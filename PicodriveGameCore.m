@@ -126,10 +126,7 @@ static bool environment_callback(unsigned cmd, void *data)
         }
         case RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY :
         {
-            // FIXME: Build a path in a more appropriate place
-            NSString *appSupportPath = [NSString pathWithComponents:@[
-                                        [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) lastObject],
-                                        @"OpenEmu", @"BIOS"]];
+            NSString *appSupportPath = current.biosDirectoryPath;
             
             *(const char **)data = [appSupportPath UTF8String];
             NSLog(@"Environ SYSTEM_DIRECTORY: \"%@\".\n", appSupportPath);
