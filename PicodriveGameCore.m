@@ -312,10 +312,6 @@ static void writeSaveFile(const char* path, int type)
     //return OEIntSizeMake(current->videoWidth, current->videoHeight);
 }
 
-- (void)setupEmulation
-{
-}
-
 - (void)resetEmulation
 {
     retro_reset();
