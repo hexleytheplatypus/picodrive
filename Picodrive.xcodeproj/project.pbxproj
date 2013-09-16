@@ -64,7 +64,6 @@
 		946B978517829D3B00A212AC /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B950217829B4400A212AC /* memory.c */; };
 		946B978617829D3B00A212AC /* misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B950417829B4400A212AC /* misc.c */; };
 		946B978717829D3B00A212AC /* pcm.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B950617829B4500A212AC /* pcm.c */; };
-		946B978817829D3B00A212AC /* pico.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B950817829B4500A212AC /* pico.c */; };
 		946B978917829D3B00A212AC /* sek.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B950A17829B4500A212AC /* sek.c */; };
 		946B978A17829DDB00A212AC /* 32x.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B94E017829B4400A212AC /* 32x.c */; };
 		946B978B17829DDB00A212AC /* draw.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B94E117829B4400A212AC /* draw.c */; };
@@ -103,6 +102,8 @@
 		946B97AC1782A9FD00A212AC /* cart.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B94E617829B4400A212AC /* cart.c */; };
 		946B97AD1782AA5500A212AC /* trees.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B964B17829B4600A212AC /* trees.c */; };
 		94AFF4E3178C9436009D157E /* mp3.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B954517829B4500A212AC /* mp3.c */; };
+		94E45B9D17E67B560079D59E /* mcd.c in Sources */ = {isa = PBXBuildFile; fileRef = 94E45B9B17E67B560079D59E /* mcd.c */; };
+		94E45B9F17E67C630079D59E /* sh2soc.c in Sources */ = {isa = PBXBuildFile; fileRef = 94E45B9E17E67C630079D59E /* sh2soc.c */; };
 		C6D120F2171130E700E868A8 /* OpenEmuBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C6D120F1171130E700E868A8 /* OpenEmuBase.framework */; };
 /* End PBXBuildFile section */
 
@@ -256,8 +257,6 @@
 		946B950517829B4400A212AC /* misc_arm.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = misc_arm.s; sourceTree = "<group>"; };
 		946B950617829B4500A212AC /* pcm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pcm.c; sourceTree = "<group>"; };
 		946B950717829B4500A212AC /* pcm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pcm.h; sourceTree = "<group>"; };
-		946B950817829B4500A212AC /* pico.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pico.c; sourceTree = "<group>"; };
-		946B950917829B4500A212AC /* pico_arm.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = pico_arm.s; sourceTree = "<group>"; };
 		946B950A17829B4500A212AC /* sek.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sek.c; sourceTree = "<group>"; };
 		946B950B17829B4500A212AC /* debug.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = debug.c; sourceTree = "<group>"; };
 		946B950C17829B4500A212AC /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
@@ -560,6 +559,9 @@
 		946B964F17829B4600A212AC /* zlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zlib.h; sourceTree = "<group>"; };
 		946B965017829B4600A212AC /* zutil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = zutil.c; sourceTree = "<group>"; };
 		946B965117829B4600A212AC /* zutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zutil.h; sourceTree = "<group>"; };
+		94E45B9A17E67B560079D59E /* mcd_arm.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = mcd_arm.s; sourceTree = "<group>"; };
+		94E45B9B17E67B560079D59E /* mcd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mcd.c; sourceTree = "<group>"; };
+		94E45B9E17E67C630079D59E /* sh2soc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sh2soc.c; sourceTree = "<group>"; };
 		C6D120F1171130E700E868A8 /* OpenEmuBase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OpenEmuBase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2F7E65807B2D6F200F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
@@ -889,6 +891,7 @@
 				946B94E217829B4400A212AC /* draw_arm.s */,
 				946B94E317829B4400A212AC /* memory.c */,
 				946B94E417829B4400A212AC /* pwm.c */,
+				94E45B9E17E67C630079D59E /* sh2soc.c */,
 			);
 			path = 32x;
 			sourceTree = "<group>";
@@ -933,14 +936,14 @@
 				946B94FF17829B4400A212AC /* gfx_cd.h */,
 				946B950017829B4400A212AC /* LC89510.c */,
 				946B950117829B4400A212AC /* LC89510.h */,
+				94E45B9A17E67B560079D59E /* mcd_arm.s */,
+				94E45B9B17E67B560079D59E /* mcd.c */,
 				946B950217829B4400A212AC /* memory.c */,
 				946B950317829B4400A212AC /* memory_arm.s */,
 				946B950417829B4400A212AC /* misc.c */,
 				946B950517829B4400A212AC /* misc_arm.s */,
 				946B950617829B4500A212AC /* pcm.c */,
 				946B950717829B4500A212AC /* pcm.h */,
-				946B950817829B4500A212AC /* pico.c */,
-				946B950917829B4500A212AC /* pico_arm.s */,
 				946B950A17829B4500A212AC /* sek.c */,
 			);
 			path = cd;
@@ -1545,7 +1548,7 @@
 				946B977417829C4F00A212AC /* debug.c in Sources */,
 				946B977817829C4F00A212AC /* media.c in Sources */,
 				946B977E17829CE200A212AC /* sms.c in Sources */,
-				946B978817829D3B00A212AC /* pico.c in Sources */,
+				94E45B9D17E67B560079D59E /* mcd.c in Sources */,
 				946B978517829D3B00A212AC /* memory.c in Sources */,
 				946B978917829D3B00A212AC /* sek.c in Sources */,
 				946B978417829D3B00A212AC /* LC89510.c in Sources */,
@@ -1560,6 +1563,7 @@
 				946B978C17829DDB00A212AC /* memory.c in Sources */,
 				946B978B17829DDB00A212AC /* draw.c in Sources */,
 				946B978D17829DDB00A212AC /* pwm.c in Sources */,
+				94E45B9F17E67C630079D59E /* sh2soc.c in Sources */,
 				946B978F17829E1700A212AC /* pico.c in Sources */,
 				946B978E17829E1700A212AC /* memory.c in Sources */,
 				946B979017829E1700A212AC /* xpcm.c in Sources */,
