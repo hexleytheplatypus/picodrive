@@ -16,6 +16,9 @@ mds/
 cfg/
 libs/
 obj/
+.opk_data
+PicoDrive
+PicoDrive.opk
 # Xcode
 *.DS_Store
 OEBuildVersion.h
