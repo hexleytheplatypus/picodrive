@@ -421,7 +421,7 @@ static void writeSaveFile(const char* path, int type)
         return;
     }
 
-    int serial_size = retro_serialize_size();
+    int serial_size = 678514;
     if(serial_size != [data length])
     {
         NSError *error = [NSError errorWithDomain:OEGameCoreErrorDomain code:OEGameCoreStateHasWrongSizeError userInfo:@{
