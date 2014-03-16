@@ -123,6 +123,20 @@ typedef struct
 	// PD extension
 	int            io_cycle_counter; // cycles left
 
+	unsigned int   Opcode;
+	signed int     cycles_needed;
+
+	unsigned short *PC;
+	unsigned long  BasePC;
+	unsigned int   flag_C;
+	unsigned int   flag_V;
+	unsigned int   flag_NotZ;
+	unsigned int   flag_N;
+	unsigned int   flag_X;
+	unsigned int   flag_T;
+	unsigned int   flag_S;
+	unsigned int   flag_I;
+
 	unsigned char  not_polling;
 	unsigned char  pad[3];
 
