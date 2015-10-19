@@ -51,7 +51,7 @@ static __weak PicodriveGameCore *_current;
 
 static void audio_callback(int16_t left, int16_t right)
 {
-    GET_CURRENT_AND_RETURN();
+    GET_CURRENT_OR_RETURN();
 
 	[[current ringBufferAtIndex:0] write:&left maxLength:2];
     [[current ringBufferAtIndex:0] write:&right maxLength:2];
@@ -59,7 +59,7 @@ static void audio_callback(int16_t left, int16_t right)
 
 static size_t audio_batch_callback(const int16_t *data, size_t frames)
 {
-    GET_CURRENT_AND_RETURN(frames);
+    GET_CURRENT_OR_RETURN(frames);
 
     [[current ringBufferAtIndex:0] write:data maxLength:frames << 2];
     return frames;
@@ -67,7 +67,7 @@ static size_t audio_batch_callback(const int16_t *data, size_t frames)
 
 static void video_callback(const void *data, unsigned width, unsigned height, size_t pitch)
 {
-    GET_CURRENT_AND_RETURN();
+    GET_CURRENT_OR_RETURN();
 
     current->videoWidth  = width;
     current->videoHeight = height;
@@ -89,7 +89,7 @@ static void input_poll_callback(void)
 
 static int16_t input_state_callback(unsigned port, unsigned device, unsigned index, unsigned _id)
 {
-    GET_CURRENT_AND_RETURN(0);
+    GET_CURRENT_OR_RETURN(0);
 
     //NSLog(@"polled input: port: %d device: %d id: %d", port, device, id);
     
@@ -105,7 +105,7 @@ static int16_t input_state_callback(unsigned port, unsigned device, unsigned ind
 
 static bool environment_callback(unsigned cmd, void *data)
 {
-    GET_CURRENT_AND_RETURN(false);
+    GET_CURRENT_OR_RETURN(false);
 
     switch(cmd)
     {
