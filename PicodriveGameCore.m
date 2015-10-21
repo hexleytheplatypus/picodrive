@@ -39,6 +39,7 @@
     int16_t pad[2][12];
     NSString *romName;
     double sampleRate;
+    NSTimeInterval frameInterval;
 }
 
 @end
