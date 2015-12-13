@@ -233,11 +233,6 @@ static void writeSaveFile(const char* path, int type)
 
 - (void)executeFrame
 {
-    [self executeFrameSkippingFrame:NO];
-}
-
-- (void)executeFrameSkippingFrame: (BOOL) skip
-{
     retro_run();
 }
 
@@ -398,68 +393,50 @@ static void writeSaveFile(const char* path, int type)
     void *bytes = malloc(length);
     
     if(retro_serialize(bytes, length))
-    {
         return [NSData dataWithBytesNoCopy:bytes length:length];
+
+    if(outError) {
+        *outError = [NSError errorWithDomain:OEGameCoreErrorDomain code:OEGameCoreCouldNotSaveStateError userInfo:@{
+            NSLocalizedDescriptionKey : @"Save state data could not be written",
+            NSLocalizedRecoverySuggestionErrorKey : @"The emulator could not write the state data."
+        }];
     }
-    else
-    {
-        if(outError)
-        {
-            *outError = [NSError errorWithDomain:OEGameCoreErrorDomain
-                                            code:OEGameCoreCouldNotSaveStateError
-                                        userInfo:@{
-                                                   NSLocalizedDescriptionKey : @"Save state data could not be written",
-                                                   NSLocalizedRecoverySuggestionErrorKey : @"The emulator could not write the state data."
-                                                   }];
-        }
-        
-        return nil;
-    }
+
+    return nil;
 }
 
 - (BOOL)deserializeState:(NSData *)state withError:(NSError **)outError
 {
     size_t serial_size = retro_serialize_size();
-    if(serial_size != [state length])
-    {
-        if(outError)
-        {
-            *outError = [NSError errorWithDomain:OEGameCoreErrorDomain
-                                            code:OEGameCoreStateHasWrongSizeError
-                                        userInfo:@{
-                                                   NSLocalizedDescriptionKey : @"Save state has wrong file size.",
-                                                   NSLocalizedRecoverySuggestionErrorKey : [NSString stringWithFormat:@"The save state does not have the right size, %ld expected, got: %ld.", serial_size, [state length]]
-                                                   }];
+    if(serial_size != [state length]) {
+        if(outError) {
+            *outError = [NSError errorWithDomain:OEGameCoreErrorDomain code:OEGameCoreStateHasWrongSizeError userInfo:@{
+                NSLocalizedDescriptionKey : @"Save state has wrong file size.",
+                NSLocalizedRecoverySuggestionErrorKey : [NSString stringWithFormat:@"The save state does not have the right size, %ld expected, got: %ld.", serial_size, [state length]]
+            }];
         }
+
         return NO;
     }
     
     if(retro_unserialize([state bytes], [state length]))
-    {
         return YES;
+
+    if(outError) {
+        *outError = [NSError errorWithDomain:OEGameCoreErrorDomain code:OEGameCoreCouldNotLoadStateError userInfo:@{
+            NSLocalizedDescriptionKey : @"The save state data could not be read"
+        }];
     }
-    else
-    {
-        if(outError)
-        {
-            *outError = [NSError errorWithDomain:OEGameCoreErrorDomain
-                                            code:OEGameCoreCouldNotLoadStateError
-                                        userInfo:@{
-                                                   NSLocalizedDescriptionKey : @"The save state data could not be read"
-                                                   }];
-        }
-        
-        return NO;
-    }
+    
+    return NO;
 }
 
 - (void)saveStateToFileAtPath:(NSString *)fileName completionHandler:(void (^)(BOOL, NSError *))block
 {
-    int serial_size = retro_serialize_size();
+    size_t serial_size = retro_serialize_size();
     NSMutableData *stateData = [NSMutableData dataWithLength:serial_size];
 
-    if(!retro_serialize([stateData mutableBytes], serial_size))
-    {
+    if(!retro_serialize([stateData mutableBytes], serial_size)) {
         NSError *error = [NSError errorWithDomain:OEGameCoreErrorDomain code:OEGameCoreCouldNotSaveStateError userInfo:@{
             NSLocalizedDescriptionKey : @"Save state data could not be written",
             NSLocalizedRecoverySuggestionErrorKey : @"The emulator could not write the state data."
@@ -468,26 +445,22 @@ static void writeSaveFile(const char* path, int type)
         return;
     }
 
-    __autoreleasing NSError *error = nil;
+    NSError *error = nil;
     BOOL success = [stateData writeToFile:fileName options:NSDataWritingAtomic error:&error];
-
     block(success, success ? nil : error);
 }
 
 - (void)loadStateFromFileAtPath:(NSString *)fileName completionHandler:(void (^)(BOOL, NSError *))block
 {
-    __autoreleasing NSError *error = nil;
+    NSError *error = nil;
     NSData *data = [NSData dataWithContentsOfFile:fileName options:NSDataReadingMappedIfSafe | NSDataReadingUncached error:&error];
-
-    if(data == nil)
-    {
+    if(data == nil)  {
         block(NO, error);
         return;
     }
 
     int serial_size = 678514;
-    if(serial_size != [data length])
-    {
+    if(serial_size != [data length]) {
         NSError *error = [NSError errorWithDomain:OEGameCoreErrorDomain code:OEGameCoreStateHasWrongSizeError userInfo:@{
             NSLocalizedDescriptionKey : @"Save state has wrong file size.",
             NSLocalizedRecoverySuggestionErrorKey : [NSString stringWithFormat:@"The size of the file %@ does not have the right size, %d expected, got: %ld.", fileName, serial_size, [data length]],
@@ -496,8 +469,7 @@ static void writeSaveFile(const char* path, int type)
         return;
     }
 
-    if(!retro_unserialize([data bytes], serial_size))
-    {
+    if(!retro_unserialize([data bytes], serial_size)) {
         NSError *error = [NSError errorWithDomain:OEGameCoreErrorDomain code:OEGameCoreCouldNotLoadStateError userInfo:@{
             NSLocalizedDescriptionKey : @"The save state data could not be read",
             NSLocalizedRecoverySuggestionErrorKey : [NSString stringWithFormat:@"Could not read the file state in %@.", fileName]
