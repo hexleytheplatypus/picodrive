@@ -29,7 +29,7 @@
 		<key>openemu.system.32x</key>
 		<dict>
 			<key>OEGameCoreRewindBufferSeconds</key>
-			<integer>180</integer>
+			<integer>60</integer>
 			<key>OEGameCoreRewindInterval</key>
 			<integer>2</integer>
 			<key>OEGameCoreSupportsRewinding</key>
