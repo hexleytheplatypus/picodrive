@@ -304,9 +304,10 @@ static void writeSaveFile(const char* path, int type)
 }
 
 #pragma mark Video
-- (const void *)videoBuffer
+
+- (const void *)getVideoBufferWithHint:(void *)hint
 {
-    return videoBuffer;
+    return videoBuffer = (uint16_t *)(hint ?: videoBuffer);
 }
 
 - (OEIntRect)screenRect
@@ -363,11 +364,6 @@ static void writeSaveFile(const char* path, int type)
 - (GLenum)pixelType
 {
     return GL_UNSIGNED_SHORT_5_6_5;
-}
-
-- (GLenum)internalPixelFormat
-{
-    return GL_RGB5;
 }
 
 - (double)audioSampleRate
