@@ -141,7 +141,7 @@ static bool environment_callback(unsigned cmd, void *data)
         {
             NSString *appSupportPath = current.biosDirectoryPath;
             
-            *(const char **)data = [appSupportPath UTF8String];
+            *(const char **)data = appSupportPath.fileSystemRepresentation;
             NSLog(@"Environ SYSTEM_DIRECTORY: \"%@\".\n", appSupportPath);
             break;
         }
@@ -261,7 +261,7 @@ static void writeSaveFile(const char* path, int type)
     retro_set_input_state(input_state_callback);
     
     
-    const char *fullPath = [path UTF8String];
+    const char *fullPath = path.fileSystemRepresentation;
     
     struct retro_game_info info = {NULL};
     info.path = fullPath;
@@ -282,7 +282,7 @@ static void writeSaveFile(const char* path, int type)
             
             NSString *filePath = [batterySavesDirectory stringByAppendingPathComponent:[extensionlessFilename stringByAppendingPathExtension:@"sav"]];
             
-            loadSaveFile([filePath UTF8String], RETRO_MEMORY_SAVE_RAM);
+            loadSaveFile(filePath.fileSystemRepresentation, RETRO_MEMORY_SAVE_RAM);
         }
         
         struct retro_system_av_info info;
@@ -342,7 +342,7 @@ static void writeSaveFile(const char* path, int type)
         
         NSString *filePath = [batterySavesDirectory stringByAppendingPathComponent:[extensionlessFilename stringByAppendingPathExtension:@"sav"]];
         
-        writeSaveFile([filePath UTF8String], RETRO_MEMORY_SAVE_RAM);
+        writeSaveFile(filePath.fileSystemRepresentation, RETRO_MEMORY_SAVE_RAM);
     }
     
     NSLog(@"retro term");
