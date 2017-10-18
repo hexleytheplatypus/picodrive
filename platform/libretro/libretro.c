@@ -1384,7 +1384,9 @@ void retro_init(void)
    PicoMCDopenTray = disk_tray_open;
    PicoMCDcloseTray = disk_tray_close;
 
-   update_variables();
+   //update_variables();
+    PicoSetInputDevice(0, PICO_INPUT_PAD_6BTN);
+    PicoSetInputDevice(1, PICO_INPUT_PAD_6BTN);
 }
 
 void retro_deinit(void)
