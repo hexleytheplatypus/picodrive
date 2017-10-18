@@ -37,9 +37,10 @@
 /* Begin PBXBuildFile section */
 		82287C09101E9C2C0072172D /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82287C08101E9C2C0072172D /* libz.dylib */; };
 		82287C39101E9DB40072172D /* PicodriveGameCore.m in Sources */ = {isa = PBXBuildFile; fileRef = 82287C34101E9DB40072172D /* PicodriveGameCore.m */; };
+		87249C731F96FDEB00DD78C0 /* libretro.c in Sources */ = {isa = PBXBuildFile; fileRef = 87249C651F96FDEB00DD78C0 /* libretro.c */; };
+		87249C7E1F96FE2200DD78C0 /* eeprom_spi.c in Sources */ = {isa = PBXBuildFile; fileRef = 87249C7D1F96FE2200DD78C0 /* eeprom_spi.c */; };
 		8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
-		946B977017829BD600A212AC /* libretro.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B95DE17829B4600A212AC /* libretro.c */; };
 		946B977117829C0500A212AC /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B951617829B4500A212AC /* memory.c */; };
 		946B977217829C0500A212AC /* state.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B953417829B4500A212AC /* state.c */; };
 		946B977317829C0E00A212AC /* sek.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B952817829B4500A212AC /* sek.c */; };
@@ -91,7 +92,6 @@
 		946B97A71782A97500A212AC /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B963717829B4600A212AC /* compress.c */; };
 		946B97A81782A97900A212AC /* uncompr.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B964D17829B4600A212AC /* uncompr.c */; };
 		946B97A91782A99700A212AC /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B963017829B4600A212AC /* unzip.c */; };
-		946B97AA1782A99B00A212AC /* unzip_stream.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B963217829B4600A212AC /* unzip_stream.c */; };
 		946B97AB1782A9C900A212AC /* pico.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B952417829B4500A212AC /* pico.c */; };
 		946B97AC1782A9FD00A212AC /* cart.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B94E617829B4400A212AC /* cart.c */; };
 		946B97AD1782AA5500A212AC /* trees.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B964B17829B4600A212AC /* trees.c */; };
@@ -144,6 +144,10 @@
 		82287C33101E9DB40072172D /* PicodriveGameCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PicodriveGameCore.h; sourceTree = "<group>"; };
 		82287C34101E9DB40072172D /* PicodriveGameCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PicodriveGameCore.m; sourceTree = "<group>"; };
 		825C7E44101FAB7F0072187B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
+		87249C651F96FDEB00DD78C0 /* libretro.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = libretro.c; sourceTree = "<group>"; };
+		87249C6F1F96FDEB00DD78C0 /* libretro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libretro.h; sourceTree = "<group>"; };
+		87249C7C1F96FE2200DD78C0 /* eeprom_spi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eeprom_spi.h; sourceTree = "<group>"; };
+		87249C7D1F96FE2200DD78C0 /* eeprom_spi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = eeprom_spi.c; sourceTree = "<group>"; };
 		8D5B49B6048680CD000E48DA /* Picodrive.oecoreplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Picodrive.oecoreplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		946B948A1782996900A212AC /* OESega32XSystemResponderClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OESega32XSystemResponderClient.h; path = "../OpenEmu/Sega 32X/OESega32XSystemResponderClient.h"; sourceTree = "<group>"; };
@@ -251,7 +255,6 @@
 		946B950E17829B4500A212AC /* draw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = draw.c; sourceTree = "<group>"; };
 		946B950F17829B4500A212AC /* draw2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = draw2.c; sourceTree = "<group>"; };
 		946B951017829B4500A212AC /* draw2_arm.S */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = draw2_arm.S; sourceTree = "<group>"; };
-		946B951117829B4500A212AC /* draw_amips.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = draw_amips.s; sourceTree = "<group>"; };
 		946B951217829B4500A212AC /* draw_arm.S */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = draw_arm.S; sourceTree = "<group>"; };
 		946B951317829B4500A212AC /* eeprom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = eeprom.c; sourceTree = "<group>"; };
 		946B951417829B4500A212AC /* m68kif_cyclone.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = m68kif_cyclone.s; sourceTree = "<group>"; };
@@ -441,8 +444,6 @@
 		946B95DB17829B4600A212AC /* dsnd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dsnd.h; sourceTree = "<group>"; };
 		946B95DC17829B4600A212AC /* in_vk.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = in_vk.c; sourceTree = "<group>"; };
 		946B95DD17829B4600A212AC /* in_vk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = in_vk.h; sourceTree = "<group>"; };
-		946B95DE17829B4600A212AC /* libretro.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = libretro.c; sourceTree = "<group>"; };
-		946B95DF17829B4600A212AC /* libretro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libretro.h; sourceTree = "<group>"; };
 		946B95E117829B4600A212AC /* blit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = blit.c; sourceTree = "<group>"; };
 		946B95E217829B4600A212AC /* emu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = emu.c; sourceTree = "<group>"; };
 		946B95E317829B4600A212AC /* host_dasm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = host_dasm.c; sourceTree = "<group>"; };
@@ -515,8 +516,6 @@
 		946B962E17829B4600A212AC /* textfilter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = textfilter.c; sourceTree = "<group>"; };
 		946B963017829B4600A212AC /* unzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = unzip.c; sourceTree = "<group>"; };
 		946B963117829B4600A212AC /* unzip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unzip.h; sourceTree = "<group>"; };
-		946B963217829B4600A212AC /* unzip_stream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = unzip_stream.c; sourceTree = "<group>"; };
-		946B963317829B4600A212AC /* unzip_stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unzip_stream.h; sourceTree = "<group>"; };
 		946B963517829B4600A212AC /* adler32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = adler32.c; sourceTree = "<group>"; };
 		946B963617829B4600A212AC /* ChangeLog */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ChangeLog; sourceTree = "<group>"; };
 		946B963717829B4600A212AC /* compress.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = compress.c; sourceTree = "<group>"; };
@@ -650,6 +649,15 @@
 			children = (
 			);
 			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		87249C641F96FDEB00DD78C0 /* libretro */ = {
+			isa = PBXGroup;
+			children = (
+				87249C651F96FDEB00DD78C0 /* libretro.c */,
+				87249C6F1F96FDEB00DD78C0 /* libretro.h */,
+			);
+			path = libretro;
 			sourceTree = "<group>";
 		};
 		946B948B17829AFD00A212AC /* picodrive */ = {
@@ -846,7 +854,6 @@
 				946B950E17829B4500A212AC /* draw.c */,
 				946B950F17829B4500A212AC /* draw2.c */,
 				946B951017829B4500A212AC /* draw2_arm.S */,
-				946B951117829B4500A212AC /* draw_amips.s */,
 				946B951217829B4500A212AC /* draw_arm.S */,
 				946B951317829B4500A212AC /* eeprom.c */,
 				946B951417829B4500A212AC /* m68kif_cyclone.s */,
@@ -894,6 +901,8 @@
 			children = (
 				946B94E817829B4400A212AC /* carthw.c */,
 				946B94E917829B4400A212AC /* carthw.h */,
+				87249C7D1F96FE2200DD78C0 /* eeprom_spi.c */,
+				87249C7C1F96FE2200DD78C0 /* eeprom_spi.h */,
 				946B94EA17829B4400A212AC /* svp */,
 			);
 			path = carthw;
@@ -974,8 +983,7 @@
 				946B954C17829B4500A212AC /* gizmondo */,
 				946B955817829B4500A212AC /* gp2x */,
 				946B959117829B4500A212AC /* libpicofe */,
-				946B95DE17829B4600A212AC /* libretro.c */,
-				946B95DF17829B4600A212AC /* libretro.h */,
+				87249C641F96FDEB00DD78C0 /* libretro */,
 				946B95E017829B4600A212AC /* linux */,
 				946B95ED17829B4600A212AC /* pandora */,
 				946B960017829B4600A212AC /* psp */,
@@ -1370,8 +1378,6 @@
 			children = (
 				946B963017829B4600A212AC /* unzip.c */,
 				946B963117829B4600A212AC /* unzip.h */,
-				946B963217829B4600A212AC /* unzip_stream.c */,
-				946B963317829B4600A212AC /* unzip_stream.h */,
 			);
 			path = unzip;
 			sourceTree = "<group>";
@@ -1506,7 +1512,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				82287C39101E9DB40072172D /* PicodriveGameCore.m in Sources */,
-				946B977017829BD600A212AC /* libretro.c in Sources */,
+				87249C731F96FDEB00DD78C0 /* libretro.c in Sources */,
 				946B979E1782A91100A212AC /* mp3_dummy.c in Sources */,
 				946B979F1782A92A00A212AC /* gzio.c in Sources */,
 				946B97A01782A93D00A212AC /* inffast.c in Sources */,
@@ -1520,7 +1526,6 @@
 				946B97A71782A97500A212AC /* compress.c in Sources */,
 				946B97A81782A97900A212AC /* uncompr.c in Sources */,
 				946B97A91782A99700A212AC /* unzip.c in Sources */,
-				946B97AA1782A99B00A212AC /* unzip_stream.c in Sources */,
 				946B97AB1782A9C900A212AC /* pico.c in Sources */,
 				946B97AC1782A9FD00A212AC /* cart.c in Sources */,
 				946B977117829C0500A212AC /* memory.c in Sources */,
@@ -1543,6 +1548,7 @@
 				946B978917829D3B00A212AC /* sek.c in Sources */,
 				94B3AAC7183C815E009F8B71 /* cdd.c in Sources */,
 				946B978217829D3B00A212AC /* cue.c in Sources */,
+				87249C7E1F96FE2200DD78C0 /* eeprom_spi.c in Sources */,
 				946B978617829D3B00A212AC /* misc.c in Sources */,
 				946B978717829D3B00A212AC /* pcm.c in Sources */,
 				946B978A17829DDB00A212AC /* 32x.c in Sources */,
