@@ -310,6 +310,13 @@ static void writeSaveFile(const char* path, int type)
     return videoBuffer = (uint16_t *)(hint ?: videoBuffer);
 }
 
+- (OEIntSize)aspectSize
+{
+    // H32 mode (256px * 8:7 PAR)
+    // H40 mode (320px * 32:35 PAR)
+    return OEIntSizeMake(292, 224);
+}
+
 - (OEIntRect)screenRect
 {
     return OEIntRectMake(0, 0, videoWidth, videoHeight);
