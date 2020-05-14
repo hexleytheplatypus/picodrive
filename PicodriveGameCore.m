@@ -1,28 +1,27 @@
 /*
- Copyright (c) 2013, OpenEmu Team
- 
- 
+ Copyright (c) 2020, OpenEmu Team
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in the
- documentation and/or other materials provided with the distribution.
- * Neither the name of the OpenEmu Team nor the
- names of its contributors may be used to endorse or promote products
- derived from this software without specific prior written permission.
- 
+     * Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+     * Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+     * Neither the name of the OpenEmu Team nor the
+       names of its contributors may be used to endorse or promote products
+       derived from this software without specific prior written permission.
+
  THIS SOFTWARE IS PROVIDED BY OpenEmu Team ''AS IS'' AND ANY
  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  DISCLAIMED. IN NO EVENT SHALL OpenEmu Team BE LIABLE FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #import "PicodriveGameCore.h"
@@ -30,284 +29,166 @@
 #import "OESega32XSystemResponderClient.h"
 #import <OpenGL/gl.h>
 
-#include "libretro.h"
+#include <sys/mman.h>
+#include "pico/pico_int.h"
+#include "pico/state.h"
+#include "pico/patch.h"
+#include "../common/input_pico.h"
+
+static int16_t ALIGNED(4) soundBuffer[2 * 44100 / 50];
 
 @interface PicodriveGameCore () <OESega32XSystemResponderClient>
 {
-    uint16_t *videoBuffer;
-    int videoWidth, videoHeight;
-    int16_t pad[2][12];
-    NSString *romName;
-    double sampleRate;
-    NSTimeInterval frameInterval;
+    uint16_t *_videoBuffer;
+    NSURL *_romFile;
 }
 
 @end
-
-NSUInteger Sega32XEmulatorValues[] = { RETRO_DEVICE_ID_JOYPAD_UP, RETRO_DEVICE_ID_JOYPAD_DOWN, RETRO_DEVICE_ID_JOYPAD_LEFT, RETRO_DEVICE_ID_JOYPAD_RIGHT, RETRO_DEVICE_ID_JOYPAD_Y, RETRO_DEVICE_ID_JOYPAD_B, RETRO_DEVICE_ID_JOYPAD_A, RETRO_DEVICE_ID_JOYPAD_L, RETRO_DEVICE_ID_JOYPAD_X, RETRO_DEVICE_ID_JOYPAD_R, RETRO_DEVICE_ID_JOYPAD_START, RETRO_DEVICE_ID_JOYPAD_SELECT };
 
 static __weak PicodriveGameCore *_current;
 
 @implementation PicodriveGameCore
 
-static void audio_callback(int16_t left, int16_t right)
-{
-    GET_CURRENT_OR_RETURN();
-
-	[[current ringBufferAtIndex:0] write:&left maxLength:2];
-    [[current ringBufferAtIndex:0] write:&right maxLength:2];
-}
-
-static size_t audio_batch_callback(const int16_t *data, size_t frames)
-{
-    GET_CURRENT_OR_RETURN(frames);
-
-    [[current ringBufferAtIndex:0] write:data maxLength:frames << 2];
-    return frames;
-}
-
-static void video_callback(const void *data, unsigned width, unsigned height, size_t pitch)
-{
-    GET_CURRENT_OR_RETURN();
-
-    current->videoWidth  = width;
-    current->videoHeight = height;
-    
-    dispatch_queue_t the_queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    
-    dispatch_apply(height, the_queue, ^(size_t y){
-        const uint16_t *src = (uint16_t*)data + y * (pitch >> 1); //pitch is in bytes not pixels
-        uint16_t *dst = current->videoBuffer + y * 320;
-        
-        memcpy(dst, src, sizeof(uint16_t)*width);
-    });
-}
-
-static void input_poll_callback(void)
-{
-	//NSLog(@"poll callback");
-}
-
-static int16_t input_state_callback(unsigned port, unsigned device, unsigned index, unsigned _id)
-{
-    GET_CURRENT_OR_RETURN(0);
-
-    //NSLog(@"polled input: port: %d device: %d id: %d", port, device, id);
-    
-    if (port == 0 & device == RETRO_DEVICE_JOYPAD) {
-        return current->pad[0][_id];
-    }
-    else if(port == 1 & device == RETRO_DEVICE_JOYPAD) {
-        return current->pad[1][_id];
-    }
-    
-    return 0;
-}
-
-static bool environment_callback(unsigned cmd, void *data)
-{
-    GET_CURRENT_OR_RETURN(false);
-
-    switch(cmd)
-    {
-        case RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE :
-        {
-            break;
-        }
-        case RETRO_ENVIRONMENT_SET_PIXEL_FORMAT :
-        {
-            enum retro_pixel_format pix_fmt = *(const enum retro_pixel_format*)data;
-            switch (pix_fmt)
-            {
-                case RETRO_PIXEL_FORMAT_0RGB1555:
-                    NSLog(@"Environ SET_PIXEL_FORMAT: 0RGB1555");
-                    break;
-                
-                case RETRO_PIXEL_FORMAT_RGB565:
-                    NSLog(@"Environ SET_PIXEL_FORMAT: RGB565");
-                    break;
-                    
-                case RETRO_PIXEL_FORMAT_XRGB8888:
-                    NSLog(@"Environ SET_PIXEL_FORMAT: XRGB8888");
-                    break;
-                    
-                default:
-                    return false;
-            }
-            //currentPixFmt = pix_fmt;
-            break;
-        }
-        case RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY :
-        {
-            NSString *appSupportPath = current.biosDirectoryPath;
-            
-            *(const char **)data = appSupportPath.fileSystemRepresentation;
-            NSLog(@"Environ SYSTEM_DIRECTORY: \"%@\".\n", appSupportPath);
-            break;
-        }
-        default :
-            NSLog(@"Environ UNSUPPORTED (#%u).\n", cmd);
-            return false;
-    }
-    
-    return true;
-}
-
-static void loadSaveFile(const char* path, int type)
-{
-    FILE *file;
-    
-    file = fopen(path, "rb");
-    if ( !file )
-    {
-        return;
-    }
-    
-    size_t size = retro_get_memory_size(type);
-    void *data = retro_get_memory_data(type);
-    
-    if (size == 0 || !data)
-    {
-        fclose(file);
-        return;
-    }
-    
-    int rc = fread(data, sizeof(uint8_t), size, file);
-    if ( rc != size )
-    {
-        NSLog(@"Couldn't load save file.");
-    }
-    
-    NSLog(@"Loaded save file: %s", path);
-    
-    fclose(file);
-}
-
-static void writeSaveFile(const char* path, int type)
-{
-    size_t size = retro_get_memory_size(type);
-    void *data = retro_get_memory_data(type);
-    
-    if ( data && size > 0 )
-    {
-        FILE *file = fopen(path, "wb");
-        if ( file != NULL )
-        {
-            NSLog(@"Saving state %s. Size: %d bytes.", path, (int)size);
-            retro_serialize(data, size);
-            if ( fwrite(data, sizeof(uint8_t), size, file) != size )
-                NSLog(@"Did not save state properly.");
-            fclose(file);
-        }
-    }
-}
-
--(BOOL)rendersToOpenGL;
-{
-    return NO;
-}
-
-- (oneway void)didPushSega32XButton:(OESega32XButton)button forPlayer:(NSUInteger)player;
-{
-    pad[player-1][Sega32XEmulatorValues[button]] = 1;
-}
-
-- (oneway void)didReleaseSega32XButton:(OESega32XButton)button forPlayer:(NSUInteger)player;
-{
-    pad[player-1][Sega32XEmulatorValues[button]] = 0;
-}
-
 - (id)init
 {
     if((self = [super init]))
     {
-        videoBuffer = (uint16_t*)malloc(320 * 240 * 2);
+        _videoBuffer = (uint16_t *)malloc(320 * 240 * sizeof(uint16_t));
     }
-    
+
 	_current = self;
-    
+
 	return self;
 }
 
-#pragma mark Exectuion
-
-- (void)executeFrame
+- (void)dealloc
 {
-    retro_run();
+    free(_videoBuffer);
 }
+
+// MARK: - Execution
 
 - (BOOL)loadFileAtPath:(NSString *)path error:(NSError **)error
 {
-	memset(pad, 0, sizeof(int16_t) * 10);
-    
-    const void *data;
-    size_t size;
-    romName = [path copy];
-    
-    //load cart, read bytes, get length
-    NSData* dataObj = [NSData dataWithContentsOfFile:[romName stringByStandardizingPath]];
-    if(dataObj == nil) return false;
-    size = [dataObj length];
-    data = (uint8_t*)[dataObj bytes];
-    const char *meta = NULL;
-    
-    retro_set_environment(environment_callback);
-	retro_init();
-	
-    retro_set_audio_sample(audio_callback);
-    retro_set_audio_sample_batch(audio_batch_callback);
-    retro_set_video_refresh(video_callback);
-    retro_set_input_poll(input_poll_callback);
-    retro_set_input_state(input_state_callback);
-    
-    
-    const char *fullPath = path.fileSystemRepresentation;
-    
-    struct retro_game_info info = {NULL};
-    info.path = fullPath;
-    info.data = data;
-    info.size = size;
-    info.meta = meta;
-    
-    if(retro_load_game(&info))
-    {
-        NSString *path = romName;
-        NSString *extensionlessFilename = [[path lastPathComponent] stringByDeletingPathExtension];
-        
-        NSString *batterySavesDirectory = [self batterySavesDirectoryPath];
-        
-        if([batterySavesDirectory length] != 0)
-        {
-            [[NSFileManager defaultManager] createDirectoryAtPath:batterySavesDirectory withIntermediateDirectories:YES attributes:nil error:NULL];
-            
-            NSString *filePath = [batterySavesDirectory stringByAppendingPathComponent:[extensionlessFilename stringByAppendingPathExtension:@"sav"]];
-            
-            loadSaveFile(filePath.fileSystemRepresentation, RETRO_MEMORY_SAVE_RAM);
-        }
-        
-        struct retro_system_av_info info;
-        retro_get_system_av_info(&info);
-        
-        frameInterval = info.timing.fps;
-        sampleRate = info.timing.sample_rate;
-        
-        //retro_set_controller_port_device(SNES_PORT_1, RETRO_DEVICE_JOYPAD);
-        
-        retro_get_region();
-        
-        retro_run();
-        
-        return YES;
+    _romFile = [NSURL fileURLWithPath:path];
+
+    // Picodrive defaults - not sure what all is truly needed for just 32X
+    PicoIn.opt = POPT_EN_STEREO|POPT_EN_FM|POPT_EN_PSG|POPT_EN_Z80
+    | POPT_EN_MCD_PCM|POPT_EN_MCD_CDDA|POPT_EN_MCD_GFX
+    | POPT_EN_32X|POPT_EN_PWM
+    | POPT_ACC_SPRITES|POPT_DIS_32C_BORDER;
+
+    PicoIn.sndRate = 44100;
+    PicoIn.autoRgnOrder = 0x184; // US, EU, JP
+
+    PicoInit();
+    PicoDrawSetOutFormat(PDF_RGB555, 0);
+    PicoDrawSetOutBuf(_videoBuffer, 320 * 2);
+
+    PicoSetInputDevice(0, PICO_INPUT_PAD_6BTN);
+    PicoSetInputDevice(1, PICO_INPUT_PAD_6BTN);
+
+    enum media_type_e media_type;
+    media_type = PicoLoadMedia(path.fileSystemRepresentation, NULL, NULL, NULL);
+
+    switch (media_type) {
+    case PM_BAD_DETECT:
+       // Failed to detect ROM image type.
+       return NO;
+    case PM_ERROR:
+       // Load error
+       return NO;
+    default:
+       break;
     }
-    
-    return NO;
+
+    PicoLoopPrepare();
+
+    PicoIn.writeSound = sound_write;
+    memset(soundBuffer, 0, sizeof(soundBuffer));
+    PicoIn.sndOut = soundBuffer;
+    PsndRerate(0);
+
+    // Set battery saves dir and load SRAM
+    NSString *extensionlessFilename = _romFile.lastPathComponent.stringByDeletingPathExtension;
+    NSURL *batterySavesDirectory = [NSURL fileURLWithPath:self.batterySavesDirectoryPath];
+    [NSFileManager.defaultManager createDirectoryAtURL:batterySavesDirectory withIntermediateDirectories:YES attributes:nil error:nil];
+    NSURL *saveFile = [batterySavesDirectory URLByAppendingPathComponent:[extensionlessFilename stringByAppendingPathExtension:@"sav2"]];
+
+    if ([saveFile checkResourceIsReachableAndReturnError:nil])
+    {
+        NSData *saveData = [NSData dataWithContentsOfURL:saveFile];
+        memcpy(Pico.sv.data, saveData.bytes, Pico.sv.size);
+        NSLog(@"[Picodrive] Loaded sram");
+    }
+
+    return YES;
 }
 
-#pragma mark Video
+- (void)executeFrame
+{
+    //PicoPatchApply();
+    PicoFrame();
+}
+
+- (void)resetEmulation
+{
+    PicoReset();
+}
+
+- (void)stopEmulation
+{
+    // Only save if SRAM has been modified
+    int sram_size = Pico.sv.size;
+    uint8_t *sram_data = Pico.sv.data;
+
+    // sram save needs some special processing
+    // see if we have anything to save
+    for (; sram_size > 0; sram_size--)
+        if (sram_data[sram_size-1]) break;
+
+    if (sram_size && Pico.sv.changed)
+    {
+        NSError *error = nil;
+        NSString *extensionlessFilename = _romFile.lastPathComponent.stringByDeletingPathExtension;
+        NSURL *batterySavesDirectory = [NSURL fileURLWithPath:self.batterySavesDirectoryPath];
+        NSURL *saveFile = [batterySavesDirectory URLByAppendingPathComponent:[extensionlessFilename stringByAppendingPathExtension:@"sav2"]];
+
+        // copy SRAM data
+        NSData *saveData = [NSData dataWithBytes:sram_data length:sram_size];
+        [saveData writeToURL:saveFile options:NSDataWritingAtomic error:&error];
+
+        if (error)
+            NSLog(@"[Picodrive] Error writing sram file: %@", error);
+        else
+            NSLog(@"[Picodrive] Saved sram file: %@", saveFile);
+    }
+
+    PicoExit();
+
+    [super stopEmulation];
+}
+
+- (NSTimeInterval)frameInterval
+{
+    return Pico.m.pal ? 50 : 60;
+}
+
+// MARK: - Video
 
 - (const void *)getVideoBufferWithHint:(void *)hint
 {
-    return videoBuffer = (uint16_t *)(hint ?: videoBuffer);
+    return (uint16_t *)_videoBuffer;
+}
+
+- (OEIntRect)screenRect
+{
+    return OEIntRectMake(0, 8, 320, 224);
+}
+
+- (OEIntSize)bufferSize
+{
+    return OEIntSizeMake(320, 240);
 }
 
 - (OEIntSize)aspectSize
@@ -315,52 +196,6 @@ static void writeSaveFile(const char* path, int type)
     // H32 mode (256px * 8:7 PAR)
     // H40 mode (320px * 32:35 PAR)
     return OEIntSizeMake(292, 224);
-}
-
-- (OEIntRect)screenRect
-{
-    return OEIntRectMake(0, 0, videoWidth, videoHeight);
-}
-
-- (OEIntSize)bufferSize
-{
-    return OEIntSizeMake(320, 240);
-    //return OEIntSizeMake(current->videoWidth, current->videoHeight);
-}
-
-- (void)resetEmulation
-{
-    retro_reset();
-}
-
-- (void)stopEmulation
-{
-    NSString *path = romName;
-    NSString *extensionlessFilename = [[path lastPathComponent] stringByDeletingPathExtension];
-    
-    NSString *batterySavesDirectory = [self batterySavesDirectoryPath];
-    
-    if([batterySavesDirectory length] != 0)
-    {
-        
-        [[NSFileManager defaultManager] createDirectoryAtPath:batterySavesDirectory withIntermediateDirectories:YES attributes:nil error:NULL];
-        
-        NSLog(@"Trying to save SRAM");
-        
-        NSString *filePath = [batterySavesDirectory stringByAppendingPathComponent:[extensionlessFilename stringByAppendingPathExtension:@"sav"]];
-        
-        writeSaveFile(filePath.fileSystemRepresentation, RETRO_MEMORY_SAVE_RAM);
-    }
-    
-    NSLog(@"retro term");
-    retro_unload_game();
-    retro_deinit();
-    [super stopEmulation];
-}
-
-- (void)dealloc
-{
-    free(videoBuffer);
 }
 
 - (GLenum)pixelFormat
@@ -373,14 +208,11 @@ static void writeSaveFile(const char* path, int type)
     return GL_UNSIGNED_SHORT_5_6_5;
 }
 
+// MARK: - Audio
+
 - (double)audioSampleRate
 {
-    return sampleRate ? sampleRate : 44100;
-}
-
-- (NSTimeInterval)frameInterval
-{
-    return frameInterval ? frameInterval : 60;
+    return 44100;
 }
 
 - (NSUInteger)channelCount
@@ -388,14 +220,14 @@ static void writeSaveFile(const char* path, int type)
     return 2;
 }
 
-#pragma mark - Save States
+// MARK: - Save States
 
 - (NSData *)serializeStateWithError:(NSError **)outError
 {
-    size_t length = retro_serialize_size();
+    size_t length = picodrive_serialize_size();
     void *bytes = malloc(length);
-    
-    if(retro_serialize(bytes, length))
+
+    if(picodrive_serialize(bytes, length))
         return [NSData dataWithBytesNoCopy:bytes length:length];
 
     if(outError) {
@@ -410,19 +242,19 @@ static void writeSaveFile(const char* path, int type)
 
 - (BOOL)deserializeState:(NSData *)state withError:(NSError **)outError
 {
-    size_t serial_size = retro_serialize_size();
-    if(serial_size != [state length]) {
+    size_t serial_size = picodrive_serialize_size();
+    if(serial_size != state.length) {
         if(outError) {
             *outError = [NSError errorWithDomain:OEGameCoreErrorDomain code:OEGameCoreStateHasWrongSizeError userInfo:@{
                 NSLocalizedDescriptionKey : @"Save state has wrong file size.",
-                NSLocalizedRecoverySuggestionErrorKey : [NSString stringWithFormat:@"The save state does not have the right size, %ld expected, got: %ld.", serial_size, [state length]]
+                NSLocalizedRecoverySuggestionErrorKey : [NSString stringWithFormat:@"The save state does not have the right size, %ld expected, got: %ld.", serial_size, state.length]
             }];
         }
 
         return NO;
     }
-    
-    if(retro_unserialize([state bytes], [state length]))
+
+    if(picodrive_unserialize(state.bytes, state.length))
         return YES;
 
     if(outError) {
@@ -430,16 +262,16 @@ static void writeSaveFile(const char* path, int type)
             NSLocalizedDescriptionKey : @"The save state data could not be read"
         }];
     }
-    
+
     return NO;
 }
 
 - (void)saveStateToFileAtPath:(NSString *)fileName completionHandler:(void (^)(BOOL, NSError *))block
 {
-    size_t serial_size = retro_serialize_size();
+    size_t serial_size = picodrive_serialize_size();
     NSMutableData *stateData = [NSMutableData dataWithLength:serial_size];
 
-    if(!retro_serialize([stateData mutableBytes], serial_size)) {
+    if(!picodrive_serialize(stateData.mutableBytes, serial_size)) {
         NSError *error = [NSError errorWithDomain:OEGameCoreErrorDomain code:OEGameCoreCouldNotSaveStateError userInfo:@{
             NSLocalizedDescriptionKey : @"Save state data could not be written",
             NSLocalizedRecoverySuggestionErrorKey : @"The emulator could not write the state data."
@@ -463,16 +295,16 @@ static void writeSaveFile(const char* path, int type)
     }
 
     int serial_size = 678514;
-    if(serial_size != [data length]) {
+    if(serial_size != data.length) {
         NSError *error = [NSError errorWithDomain:OEGameCoreErrorDomain code:OEGameCoreStateHasWrongSizeError userInfo:@{
             NSLocalizedDescriptionKey : @"Save state has wrong file size.",
-            NSLocalizedRecoverySuggestionErrorKey : [NSString stringWithFormat:@"The size of the file %@ does not have the right size, %d expected, got: %ld.", fileName, serial_size, [data length]],
+            NSLocalizedRecoverySuggestionErrorKey : [NSString stringWithFormat:@"The size of the file %@ does not have the right size, %d expected, got: %ld.", fileName, serial_size, data.length],
         }];
         block(NO, error);
         return;
     }
 
-    if(!retro_unserialize([data bytes], serial_size)) {
+    if(!picodrive_unserialize(data.bytes, serial_size)) {
         NSError *error = [NSError errorWithDomain:OEGameCoreErrorDomain code:OEGameCoreCouldNotLoadStateError userInfo:@{
             NSLocalizedDescriptionKey : @"The save state data could not be read",
             NSLocalizedRecoverySuggestionErrorKey : [NSString stringWithFormat:@"Could not read the file state in %@.", fileName]
@@ -480,8 +312,224 @@ static void writeSaveFile(const char* path, int type)
         block(NO, error);
         return;
     }
-    
+
     block(YES, nil);
+}
+
+// MARK: - Input
+
+const int Sega32XMap[] = {1 << GBTN_UP, 1 << GBTN_DOWN, 1 << GBTN_LEFT, 1 << GBTN_RIGHT, 1 << GBTN_A, 1 << GBTN_B, 1 << GBTN_C, 1 << GBTN_X, 1 << GBTN_Y, 1 << GBTN_Z, 1 << GBTN_START, 1 << GBTN_MODE};
+- (oneway void)didPushSega32XButton:(OESega32XButton)button forPlayer:(NSUInteger)player
+{
+    PicoIn.pad[player-1] |= Sega32XMap[button];
+}
+
+- (oneway void)didReleaseSega32XButton:(OESega32XButton)button forPlayer:(NSUInteger)player
+{
+    PicoIn.pad[player-1] &= ~Sega32XMap[button];
+}
+
+// MARK: - Callbacks and Misc Helper Methods
+
+static void sound_write(int len)
+{
+    if (!len)
+        return;
+
+    [[_current ringBufferAtIndex:0] write:PicoIn.sndOut maxLength:len];
+}
+
+void emu_video_mode_change(int start_line, int line_count, int is_32cols)
+{
+}
+
+void emu_32x_startup(void)
+{
+}
+
+void lprintf(const char *fmt, ...)
+{
+//    char buffer[256];
+//    va_list ap;
+//    va_start(ap, fmt);
+//    vsprintf(buffer, fmt, ap);
+//    NSLog(@"[Picodrive] %s", buffer);
+//    va_end(ap);
+}
+
+void *plat_mmap(unsigned long addr, size_t size, int need_exec, int is_fixed)
+{
+    int flags = MAP_PRIVATE | MAP_ANONYMOUS;
+    void *req, *ret;
+
+    req = (void *)(uintptr_t)addr;
+    ret = mmap(req, size, PROT_READ | PROT_WRITE, flags, -1, 0);
+    if (ret == MAP_FAILED) {
+        NSLog(@"[Picodrive] mmap(%08lx, %zd) failed", addr, size);
+        return NULL;
+    }
+
+    if (addr != 0 && ret != (void *)(uintptr_t)addr) {
+        NSLog(@"[Picodrive] warning: wanted to map @%08lx, got %p", addr, ret);
+
+        if (is_fixed) {
+            munmap(ret, size);
+            return NULL;
+        }
+    }
+    return ret;
+}
+
+void plat_munmap(void *ptr, size_t size)
+{
+    if (ptr != NULL)
+        munmap(ptr, size);
+}
+
+// Not using carthw.cfg so this is probably never called.
+void *plat_mremap(void *ptr, size_t oldsize, size_t newsize)
+{
+#ifdef __linux__
+    void *ret = mremap(ptr, oldsize, newsize, 0);
+    if (ret == MAP_FAILED)
+        return NULL;
+
+    return ret;
+#else
+    void *tmp, *ret;
+    size_t preserve_size;
+
+    preserve_size = oldsize;
+    if (preserve_size > newsize)
+        preserve_size = newsize;
+    tmp = malloc(preserve_size);
+    if (tmp == NULL)
+        return NULL;
+    memcpy(tmp, ptr, preserve_size);
+
+    munmap(ptr, oldsize);
+    ret = mmap(ptr, newsize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (ret == MAP_FAILED) {
+        free(tmp);
+        return NULL;
+    }
+    memcpy(ret, tmp, preserve_size);
+    free(tmp);
+    return ret;
+#endif
+}
+
+size_t picodrive_serialize_size(void)
+{
+    struct savestate_state state = { 0, };
+    int ret;
+
+    ret = PicoStateFP(&state, 1, NULL, state_skip, NULL, state_fseek);
+    if (ret != 0)
+        return 0;
+
+    return state.pos;
+}
+
+bool picodrive_serialize(void *data, size_t size)
+{
+    struct savestate_state state = { 0, };
+    int ret;
+
+    state.save_buf = data;
+    state.size = size;
+    state.pos = 0;
+
+    ret = PicoStateFP(&state, 1, NULL, state_write, NULL, state_fseek);
+    return ret == 0;
+}
+
+bool picodrive_unserialize(const void *data, size_t size)
+{
+    struct savestate_state state = { 0, };
+    int ret;
+
+    state.load_buf = data;
+    state.size = size;
+    state.pos = 0;
+
+    ret = PicoStateFP(&state, 0, state_read, NULL, state_eof, state_fseek);
+    return ret == 0;
+}
+
+struct savestate_state {
+    const char *load_buf;
+    char *save_buf;
+    size_t size;
+    size_t pos;
+};
+
+size_t state_read(void *p, size_t size, size_t nmemb, void *file)
+{
+    struct savestate_state *state = file;
+    size_t bsize = size * nmemb;
+
+    if (state->pos + bsize > state->size) {
+        NSLog(@"[Picodrive] savestate read error: %lu/%zu", state->pos + bsize, state->size);
+        bsize = state->size - state->pos;
+        if ((int)bsize <= 0)
+            return 0;
+    }
+
+    memcpy(p, state->load_buf + state->pos, bsize);
+    state->pos += bsize;
+    return bsize;
+}
+
+size_t state_write(void *p, size_t size, size_t nmemb, void *file)
+{
+    struct savestate_state *state = file;
+    size_t bsize = size * nmemb;
+
+    if (state->pos + bsize > state->size) {
+        NSLog(@"[Picodrive] savestate write error: %lu/%zu", state->pos + bsize, state->size);
+        bsize = state->size - state->pos;
+        if ((int)bsize <= 0)
+            return 0;
+    }
+
+    memcpy(state->save_buf + state->pos, p, bsize);
+    state->pos += bsize;
+    return bsize;
+}
+
+size_t state_skip(void *p, size_t size, size_t nmemb, void *file)
+{
+    struct savestate_state *state = file;
+    size_t bsize = size * nmemb;
+
+    state->pos += bsize;
+    return bsize;
+}
+
+size_t state_eof(void *file)
+{
+    struct savestate_state *state = file;
+
+    return state->pos >= state->size;
+}
+
+int state_fseek(void *file, long offset, int whence)
+{
+    struct savestate_state *state = file;
+
+    switch (whence) {
+    case SEEK_SET:
+        state->pos = offset;
+        break;
+    case SEEK_CUR:
+        state->pos += offset;
+        break;
+    case SEEK_END:
+        state->pos = state->size + offset;
+        break;
+    }
+    return (int)state->pos;
 }
 
 @end
