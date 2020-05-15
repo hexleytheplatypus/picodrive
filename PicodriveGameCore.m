@@ -40,6 +40,7 @@ static int16_t ALIGNED(4) soundBuffer[2 * 44100 / 50];
 @interface PicodriveGameCore () <OESega32XSystemResponderClient>
 {
     uint16_t *_videoBuffer;
+    int _videoWidth;
     NSURL *_romFile;
 }
 
@@ -54,6 +55,7 @@ static __weak PicodriveGameCore *_current;
     if((self = [super init]))
     {
         _videoBuffer = (uint16_t *)malloc(320 * 240 * sizeof(uint16_t));
+        _videoWidth = 292; // initial viewport width
     }
 
 	_current = self;
@@ -183,7 +185,7 @@ static __weak PicodriveGameCore *_current;
 
 - (OEIntRect)screenRect
 {
-    return OEIntRectMake(0, 8, 320, 224);
+    return OEIntRectMake(0, 8, _videoWidth, 224);
 }
 
 - (OEIntSize)bufferSize
@@ -341,6 +343,8 @@ static void sound_write(int len)
 
 void emu_video_mode_change(int start_line, int line_count, int is_32cols)
 {
+    GET_CURRENT_OR_RETURN();
+    current->_videoWidth = is_32cols ? 256 : 320;
 }
 
 void emu_32x_startup(void)
