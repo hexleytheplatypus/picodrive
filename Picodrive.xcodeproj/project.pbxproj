@@ -149,7 +149,7 @@
 		87249C7D1F96FE2200DD78C0 /* eeprom_spi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = eeprom_spi.c; sourceTree = "<group>"; };
 		8D5B49B6048680CD000E48DA /* Picodrive.oecoreplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Picodrive.oecoreplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		946B948A1782996900A212AC /* OESega32XSystemResponderClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OESega32XSystemResponderClient.h; path = "../OpenEmu/Sega 32X/OESega32XSystemResponderClient.h"; sourceTree = "<group>"; };
+		946B948A1782996900A212AC /* OESega32XSystemResponderClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OESega32XSystemResponderClient.h; path = "../OpenEmu/SystemPlugins/Sega 32X/OESega32XSystemResponderClient.h"; sourceTree = "<group>"; };
 		946B948E17829B4400A212AC /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		946B948F17829B4400A212AC /* app.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = app.h; sourceTree = "<group>"; };
 		946B949017829B4400A212AC /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
