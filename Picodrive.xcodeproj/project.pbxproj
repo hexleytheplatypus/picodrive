@@ -39,7 +39,6 @@
 		82287C39101E9DB40072172D /* PicodriveGameCore.m in Sources */ = {isa = PBXBuildFile; fileRef = 82287C34101E9DB40072172D /* PicodriveGameCore.m */; };
 		87249C7E1F96FE2200DD78C0 /* eeprom_spi.c in Sources */ = {isa = PBXBuildFile; fileRef = 87249C7D1F96FE2200DD78C0 /* eeprom_spi.c */; };
 		8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
-		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 		946B977117829C0500A212AC /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B951617829B4500A212AC /* memory.c */; };
 		946B977217829C0500A212AC /* state.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B953417829B4500A212AC /* state.c */; };
 		946B977317829C0E00A212AC /* sek.c in Sources */ = {isa = PBXBuildFile; fileRef = 946B952817829B4500A212AC /* sek.c */; };
@@ -563,7 +562,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */,
 				82287C09101E9C2C0072172D /* libz.dylib in Frameworks */,
 				C6D120F2171130E700E868A8 /* OpenEmuBase.framework in Frameworks */,
 			);

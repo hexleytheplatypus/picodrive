@@ -27,7 +27,6 @@
 #import "PicodriveGameCore.h"
 #import <OpenEmuBase/OERingBuffer.h>
 #import "OESega32XSystemResponderClient.h"
-#import <OpenGL/gl.h>
 
 #include <sys/mman.h>
 #include "pico/pico_int.h"
@@ -200,14 +199,14 @@ static __weak PicodriveGameCore *_current;
     return OEIntSizeMake(292, 224);
 }
 
-- (GLenum)pixelFormat
+- (uint32_t)pixelFormat
 {
-    return GL_RGB;
+    return OEPixelFormat_RGB;
 }
 
-- (GLenum)pixelType
+- (uint32_t)pixelType
 {
-    return GL_UNSIGNED_SHORT_5_6_5;
+    return OEPixelType_UNSIGNED_SHORT_5_6_5;
 }
 
 // MARK: - Audio
